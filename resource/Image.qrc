@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/resource">
+        <file>Image/OIP-C(S).png</file>
+        <file>Image/02.png</file>
+    </qresource>
+</RCC>

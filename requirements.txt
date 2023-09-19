@@ -1,0 +1,6 @@
+mutagen
+pycryptodome
+wasmer
+python-magic-bin
+wasmer_compiler_cranelift
+pyside6-fluent-widgets[full]
