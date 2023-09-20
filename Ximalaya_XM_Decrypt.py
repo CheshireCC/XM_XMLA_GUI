@@ -47,9 +47,23 @@ def get_xm_info(data: bytes):
     # print(EasyID3(io.BytesIO(data)))
     id3 = ID3(io.BytesIO(data), v2_version=3)
     id3value = XMInfo()
-    id3value.title = str(id3["TIT2"])
-    id3value.album = str(id3["TALB"])
-    id3value.artist = str(id3["TPE1"])
+
+    try:
+        id3value.title = str(id3["TIT2"])
+    except:
+        id3value.title = ""
+    try:
+        id3value.album = str(id3["TALB"])
+    except:
+        id3value.album = ""
+    try:
+        id3value.artist = str(id3["TPE1"])
+    except:
+        id3value.artist = ""
+
+    # id3value.title = str(id3["TIT2"])
+    # id3value.album = str(id3["TALB"])
+    # id3value.artist = str(id3["TPE1"])
     id3value.tracknumber = int(str(id3["TRCK"]))
     id3value.ISRC = "" if id3.get("TSRC") is None else str(id3["TSRC"])
     id3value.encodedby = "" if id3.get("TENC") is None else str(id3["TENC"])
@@ -142,7 +156,14 @@ def decrypt_xm_file(from_file, output_path='./output'):
     print(f"正在解密{from_file}")
     data = read_file(from_file)
     info, audio_data = xm_decrypt(data)
-    output = f"{output_path}/{replace_invalid_chars(info.album)}/{replace_invalid_chars(info.title)}.{find_ext(audio_data[:0xff])}"
+
+    if info.album == "" and info.title == "":
+        base,file = os.path.split(from_file)
+        file = "".join(file.split(".")[:-1])
+        output = f"{output_path}/{file}.{find_ext(audio_data[:0xff])}"
+    else:
+        output = f"{output_path}/{replace_invalid_chars(info.album)}/{replace_invalid_chars(info.title)}.{find_ext(audio_data[:0xff])}"
+
     if not os.path.exists(f"{output_path}/{replace_invalid_chars(info.album)}"):
         os.makedirs(f"{output_path}/{replace_invalid_chars(info.album)}")
     buffer = io.BytesIO(audio_data)

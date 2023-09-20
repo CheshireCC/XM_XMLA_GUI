@@ -10,15 +10,14 @@
 主要是套个皮
 https://github.com/Diaoxiaozhang/Ximalaya-XM-Decrypt
 
-
 Nuitka 编译
 
 ```powershell
-nuitka --mingw --clang --standalone --enable-plugins=pyside6 --include-data-file=xm_encryptor.wasm=xm_encryptor.wasm --include-data-dir=venv\Lib\site-packages\magic\libmagic=libmagic --windows-icon-from-ico=resource/Image/OIP-C.png --windows-disable-consol --output-dir=release XM_GUI.py
+nuitka --mingw --clang --standalone --enable-plugins=pyside6 --include-data-file=xm_encryptor.wasm=xm_encryptor.wasm --include-
+data-dir=venv\Lib\site-packages\magic\libmagic=libmagic --windows-icon-from-exe="E:\\Program Files (x86)\\ximalaya-pc\\喜马拉雅.exe" --windows-disable-consol --output-dir=release XM_GUI.py
 ```
 
-
-需要手动修改 magic.py 中关于 dll 的导入逻辑 
+需要手动修改 magic.py 中关于 dll 的导入逻辑
 
 添加以下代码 至 186 行：
 

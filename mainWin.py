@@ -4,15 +4,18 @@ version: 0.1
 Author: Cheshire
 Date: 2023-09-18 17:29:17
 LastEditors: Cheshire
-LastEditTime: 2023-09-19 03:18:08
+LastEditTime: 2023-09-20 21:52:33
 '''
 
 import sys
+# from concurrent import futures
+
 from PySide6.QtGui import QTextCursor
-from PySide6.QtWidgets import QMessageBox, QFileDialog
+from PySide6.QtWidgets import QFileDialog
 from PySide6.QtCore import QObject, Signal
 
 from Ximalaya_XM_Decrypt import decrypt_xm_file
+from threading import Thread
 
 import os
 
@@ -25,6 +28,9 @@ class RedirectOutputSignalStore(QObject):
     def write(self, text):
         if(not self.signalsBlocked()):
             self.outputSignal.emit(str(text))
+    def flush(self):
+        pass
+
 
 class mainWin(mainWin_UI):
     def __init__(self, parent=None):
@@ -60,24 +66,60 @@ class mainWin(mainWin_UI):
         dir_out = QFileDialog.getExistingDirectory(self, "选择输出文件夹")
         if dir_out:
             self.LineEdit_output.setText(dir_out)
-    
+
+    def excutor_decrypt_xm_file(self, **kargs):
+        file = kargs["file"]
+        output_path = kargs['output_path']
+        print(file, output_path)
+        decrypt_xm_file(from_file=file, output_path=output_path)
+        return "\n"
+
+
     def on_PushButon_process_clicked(self):
+        self.textBrowser.clear()
+
         fileList = self.LineEdit_input.text().split(";")
         # print(fileList)
         output_path = self.LineEdit_output.text()
 
-        for file in fileList:
-            print(f"[current task: {file}]")
-            if not(os.path.exists(file)):
-                print(f"无效文件，跳过：{file}")
-                continue
+        if output_path != "":
+            if not os.path.exists(output_path):
+                try:
+                    os.mkdir(output_path)
+                except:
+                    output_path = ""
+        
+        # with futures.ThreadPoolExecutor(4) as excutor:
+
+        #     file_out_List = []
+        #     for i in range(len(fileList)):
+        #         fileList.append({"file":fileList[i], "output_path":output_path})
+
+        #     results = excutor.map(self.excutor_decrypt_xm_file, file_out_List)
             
-            if output_path == "":
-                output_path,_ = os.path.split(file)
-                # print(output_path)
+        #     for r in results:
+        #         print(type(r))
+        
+        def run(fileList:list, output_path:str):
+            for file in fileList:
+                
+                print(f"[current task: {file}]")
+                if not(os.path.exists(file)) or not(os.path.isfile(file)):
+                    print(f"无效文件，跳过：{file}")
+                    continue
+                
+                if output_path == "":
+                    output_path,_ = os.path.split(file)
+                    # print(output_path)
+                
+                decrypt_xm_file(from_file=file, output_path=output_path)
+                print("\n")
             
-            decrypt_xm_file(from_file=file,output_path=output_path)
-            
+            print("[over!]")
+
+        thread_dxf = Thread(target=run, daemon=True, args=(fileList, output_path))
+        thread_dxf.start()
+
 
     def signalAndSlot(self):
         self.PushButon_input.clicked.connect(self.on_PushButon_input_clicked)
